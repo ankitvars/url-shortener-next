@@ -3,7 +3,9 @@ import path from 'path';
 import type { ClickBreakdown, StatsResponse } from './types';
 import { generateSlug } from './slug';
 
-const DB_PATH = path.join(process.cwd(), 'shortener.db');
+// Vercel's serverless filesystem is read-only except for /tmp
+const DB_PATH = process.env.DB_PATH
+  ?? path.join(process.env.VERCEL ? '/tmp' : process.cwd(), 'shortener.db');
 
 declare global { var __db: Database.Database | undefined; }
 
