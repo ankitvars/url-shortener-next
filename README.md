@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SNIP — URL Shortener
 
-## Getting Started
+A minimal URL shortener with per-link click analytics. Zero external services — everything stored in a local SQLite database.
 
-First, run the development server:
+## Quick Start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+The SQLite database (`shortener.db`) is created automatically at startup in the project root. Use a volume mount in containerised deployments.
 
-To learn more about Next.js, take a look at the following resources:
+## API Reference
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### `POST /api/links`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Create a short link.
 
-## Deploy on Vercel
+**Request body:**
+```json
+{ "original_url": "https://example.com" }
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Response `201`:**
+```json
+{
+  "slug": "aBcDeFgH",
+  "original_url": "https://example.com",
+  "created_at": "2026-05-29T10:00:00Z",
+  "short_url": "http://localhost:3000/aBcDeFgH"
+}
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### `GET /{slug}`
+
+Redirects to the original URL (307) and records a click.
+
+### `GET /api/links/{slug}/stats`
+
+Returns click analytics for a link.
+
+```json
+{
+  "slug": "aBcDeFgH",
+  "original_url": "https://example.com",
+  "total_clicks": 42,
+  "by_country":       [{ "label": "US", "count": 20 }],
+  "by_browser":       [{ "label": "Chrome", "count": 30 }],
+  "by_referrer":      [{ "label": "https://twitter.com", "count": 10 }],
+  "clicks_over_time": [{ "label": "2026-05-29", "count": 5 }]
+}
+```
+
+## Project Layout
+
+```
+app/
+  [slug]/route.ts            # Redirect + click recording
+  api/links/route.ts         # POST — create short link
+  api/links/[slug]/stats/    # GET  — click analytics
+  page.tsx                   # Frontend UI
+lib/
+  db.ts                      # SQLite singleton + CRUD
+  slug.ts                    # Slug generator (Web Crypto, zero deps)
+  types.ts                   # Shared TypeScript interfaces
+shortener.db                 # SQLite database (auto-created, gitignored)
+```
+
+## Notes
+
+- **Country detection** requires Cloudflare (`cf-ipcountry`) or Vercel (`x-vercel-ip-country`) headers — always `null` in local dev.
+- The database is gitignored (`*.db`). Back it up separately in production.
+- Slug collisions are retried up to 5× — at 8 chars over a 62-char alphabet the probability per attempt is negligible.
