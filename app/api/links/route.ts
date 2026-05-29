@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Must be a valid http(s) URL' }, { status: 422 });
   }
 
-  const link = createLink(originalUrl);
+  const link = await createLink(originalUrl);
   const base = new URL(req.url).origin;
   const response: LinkResponse = {
     slug: link.slug,

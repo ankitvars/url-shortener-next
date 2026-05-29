@@ -26,11 +26,11 @@ function getCountry(req: NextRequest): string | null {
 export async function GET(req: NextRequest, { params }: Params) {
   const { slug } = await params; // await required in Next.js 15+
 
-  const link = getLinkBySlug(slug);
+  const link = await getLinkBySlug(slug);
   if (!link) return new NextResponse('Not found', { status: 404 });
 
   try {
-    recordClick(link.id, {
+    await recordClick(link.id, {
       referrer: req.headers.get('referer') ?? null,
       country: getCountry(req),
       browser: parseBrowser(req.headers.get('user-agent') ?? ''),
