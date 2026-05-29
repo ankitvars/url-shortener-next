@@ -1,20 +1,99 @@
 @import "tailwindcss";
-@config "../tailwind.config.ts";
 
-:root {
-  --bg:      #060606;
-  --surface: #0d0d0d;
-  --border:  #1a1a1a;
-  --lime:    #c8ff00;
-  --muted:   #555555;
-  --text:    #f0f0f0;
+@theme {
+  --color-bg:        #060606;
+  --color-surface:   #0b0b0b;
+  --color-surface-2: #111111;
+  --color-border:    #1c1c1c;
+  --color-border-hi: #2a2a2a;
+  --color-lime:      #c8ff00;
+  --color-muted:     #3a3a3a;
+  --color-muted-2:   #666666;
+  --color-text:      #dedede;
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-mono:    var(--font-jetbrains), ui-monospace, monospace;
 }
 
-html, body { background: var(--bg); color: var(--text); min-height: 100vh; }
-input { caret-color: var(--lime); }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-@keyframes bar-grow { from { width: 0; } }
-.bar-fill { animation: bar-grow 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
 
-@keyframes fade-up { from { opacity: 0; transform: translateY(8px); } }
-.fade-up { animation: fade-up 0.35s ease both; }
+html,
+body {
+  background: #060606;
+  color: #dedede;
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(200, 255, 0, 0.16);
+  color: #c8ff00;
+}
+
+::-webkit-scrollbar       { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 99px; }
+
+/* ── URL input ── */
+.url-input {
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.url-input:focus {
+  border-color: #c8ff00;
+  box-shadow: 0 0 0 1px #c8ff00, 0 0 32px rgba(200, 255, 0, 0.05);
+}
+
+/* ── Film grain overlay ── */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+/* ── Animations ── */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes bar-grow {
+  from { transform: scaleX(0); }
+}
+
+@keyframes dash-expand {
+  from { width: 0.75rem; }
+  to   { width: 1.25rem; }
+}
+
+.fade-up {
+  animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.fade-in {
+  animation: fade-in 0.25s ease both;
+}
+
+.bar-fill {
+  transform-origin: left;
+  animation: bar-grow 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
